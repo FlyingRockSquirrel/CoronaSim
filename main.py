@@ -14,12 +14,14 @@ initialPatients = 2000
 # Will be node in the graph. Contains data specific to each person
 class Person:
     def __init__(self, deathRate, recoveryTime, index, infected):
-        deathInt = random.uniform(0, 100)
+
         self.index = index
         self.infected = infected
         self.immune = False
         self.alive = True
         self.recoveryTime = recoveryTime
+
+        deathInt = random.uniform(0, 100)
         if deathInt <= deathRate:
             self.willDie = True
         else:
@@ -30,8 +32,8 @@ def willRecoverToday(averageRecTime):
     return random.randint(1, averageRecTime) == 1
 
 
-# Returns a boolean that models a binomial distribution based on how virulent
-# the given virus is
+# determines if a given instance will actually infect another by modelling a
+# binomial distribution with expected value r_0
 def willInfect(rate, totCon, totSize, recTime):
     avgCon = totCon/totSize
     totalInfectionChances = avgCon*recTime
@@ -71,14 +73,19 @@ def __main__():
         graph.add_edge(p1, p2)
 
     while numInfected > 0:
+
         infectedToday = set()
         uninfectedToday = set()
+
+        # Determining who is infected, who recovers, and who dies this iteration
         for patient in infectedPeople:
             for neighbor in graph.adj[patient]:
                 if neighbor.alive and (not neighbor.immune) and (not neighbor.infected) and willInfect(r_0, totalConnections, size, averageRecoveryTime):
                     neighbor.infected = True
                     infectedToday.add(neighbor)
+
             if willRecoverToday(averageRecoveryTime):
+                # Death logic
                 if patient.willDie:
                     patient.alive = False
                     numDead += 1
@@ -86,12 +93,18 @@ def __main__():
                 uninfectedToday.add(patient)
                 patient.immune = True
                 patient.infected = False
+
         ticks += 1
+
+        # Adding those infected to the infected set
         for infected in infectedToday:
             infectedPeople.add(infected)
             numInfected += 1
+
+        # Removing those no longer infected from the infected set
         for curedordead in uninfectedToday:
             infectedPeople.remove(curedordead)
+
     print(numDead)
     print(ticks)
     return
