@@ -6,9 +6,9 @@ import networkx as nx
 r_0 = 2.4
 deathRate = 4
 size = 10000
-totalConnections = 10000
+totalConnections = 20000
 averageRecoveryTime = 10
-initialPatients = 2000
+initialPatients = 10
 
 
 # Will be node in the graph. Contains data specific to each person
@@ -42,7 +42,7 @@ def willInfect(rate, totCon, totSize, recTime):
     return randomSample <= infProb
 
 
-def __main__():
+def main():
     people = []
     numDead = 0
     ticks = 0
@@ -110,4 +110,4 @@ def __main__():
     return
 
 
-__main__()
+main()
