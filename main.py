@@ -85,6 +85,7 @@ def __main__():
                 numInfected -= 1
                 uninfectedToday.add(patient)
                 patient.immune = True
+                patient.infected = False
         ticks += 1
         for infected in infectedToday:
             infectedPeople.add(infected)
