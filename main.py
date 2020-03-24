@@ -2,13 +2,7 @@ import random
 import networkx as nx
 
 
-# TODO: take input for these parameters instead of hardcoding them, work on visualizer, potentially implement quarantine if time permits.
-r_0 = 2.4
-deathRate = 4
-size = 10000
-totalConnections = 20000
-averageRecoveryTime = 10
-initialPatients = 10
+# TODO: Work on visualizer, potentially implement quarantine if time permits.
 
 
 # Will be node in the graph. Contains data specific to each person
@@ -43,11 +37,28 @@ def willInfect(rate, totCon, totSize, recTime):
 
 
 def main():
+
+    # Inputs for game initialization
+    print("Please enter the R_0 value: ")
+    r_0 = float(input())
+    print("Please enter the death rate: ")
+    deathRate = float(input())
+    print("Please enter the total number of people: ")
+    size = int(input())
+    print("Please enter then total number of connections: ")
+    totalConnections = int(input())
+    print("Please enter the average recovery time for this disease: ")
+    averageRecoveryTime = int(input())
+    print("Please enter the number of initial patients: ")
+    initialPatients = int(input())
+
+    # game state information initialization
     people = []
     numDead = 0
     ticks = 0
     numInfected = initialPatients
     infectedPeople = set()
+    totInfections = initialPatients
 
     # constructing nodes
     for i in range(0, size):
@@ -62,6 +73,7 @@ def main():
     graph.add_nodes_from(people)
 
     # constructing edges for graph
+    # TODO: make this more efficient somehow. It takes forever for large graphs
     while len(set(graph.edges)) < totalConnections:
         n1 = random.randint(0, size - 1)
         n2 = random.randint(0, size - 1)
@@ -100,13 +112,17 @@ def main():
         for infected in infectedToday:
             infectedPeople.add(infected)
             numInfected += 1
+            totInfections += 1
 
         # Removing those no longer infected from the infected set
         for curedordead in uninfectedToday:
             infectedPeople.remove(curedordead)
 
-    print(numDead)
-    print(ticks)
+    print("\n")
+    print(str(numDead) + " people died")
+    print(str(ticks) + " days since initial infection")
+    print(str(totInfections) + " people were infected out of " +
+          str(size) + " total people")
     return
 
 
