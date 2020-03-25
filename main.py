@@ -28,8 +28,9 @@ def willRecoverToday(averageRecTime):
     return random.randint(1, averageRecTime) == 1
 
 
-def draw(gr, pos, labeler):
-    nx.draw(gr, pos=pos, labels=labeler)
+def draw(gr, pos, labeler, colors):
+    nx.draw(gr, nodelist=list(gr.nodes), pos=pos,
+            labels=labeler, node_color=colors)
     plt.show()
 
 
@@ -72,20 +73,23 @@ def main():
     numInfected = initialPatients
     infectedPeople = set()
     totInfections = initialPatients
+    colorList = []
 
     # constructing nodes
     for i in range(0, size):
         if i < initialPatients:
             isInfected = True
+            colorList.append('r')
         else:
             isInfected = False
+            colorList.append('green')
         person = Person(deathRate, averageRecoveryTime, i, isInfected)
         people.append(person)
         if isInfected:
             infectedPeople.add(person)
-            labeler[person] = 'infected'
+            labeler[person] = str(i)
         else:
-            labeler[person] = 'healthy'
+            labeler[person] = str(i)
     graph = nx.Graph()
     graph.add_nodes_from(people)
     pos = nx.spring_layout(graph)
@@ -103,7 +107,7 @@ def main():
         graph.add_edge(p1, p2)
 
     if doprint:
-        draw(graph, pos, labeler)
+        draw(graph, pos, labeler, colorList)
 
     while numInfected > 0:
 
@@ -124,9 +128,9 @@ def main():
                 if patient.willDie:
                     patient.alive = False
                     numDead += 1
-                    labeler[patient] = 'dead'
+                    colorList[patient.index] = 'black'
                 else:
-                    labeler[patient] = 'immune'
+                    colorList[patient.index] = 'blue'
                 numInfected -= 1
                 uninfectedToday.add(patient)
                 patient.immune = True
@@ -139,14 +143,14 @@ def main():
             infectedPeople.add(infected)
             numInfected += 1
             totInfections += 1
-            labeler[infected] = 'infected'
+            colorList[infected.index] = 'red'
 
         # Removing those no longer infected from the infected set
         for curedordead in uninfectedToday:
             infectedPeople.remove(curedordead)
 
         if doprint:
-            draw(graph, pos, labeler)
+            draw(graph, pos, labeler, colorList)
 
     print("\n")
     print(str(numDead) + " people died")
