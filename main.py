@@ -1,10 +1,10 @@
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
-import time
 
 
-# TODO: Work on visualizer, potentially implement quarantine if time permits.
+# TODO: improve visualizer, potentially implement quarantine if time permits,
+# do some sort of reinforcement learning to optimize quarantine.
 
 
 # Will be node in the graph. Contains data specific to each person
