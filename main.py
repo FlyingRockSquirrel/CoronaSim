@@ -1,5 +1,7 @@
 import random
 import networkx as nx
+import matplotlib.pyplot as plt
+import time
 
 
 # TODO: Work on visualizer, potentially implement quarantine if time permits.
@@ -24,6 +26,11 @@ class Person:
 
 def willRecoverToday(averageRecTime):
     return random.randint(1, averageRecTime) == 1
+
+
+def draw(gr, pos, labeler):
+    nx.draw(gr, pos=pos, labels=labeler)
+    plt.show()
 
 
 # determines if a given instance will actually infect another by modelling a
@@ -51,9 +58,15 @@ def main():
     averageRecoveryTime = int(input())
     print("Please enter the number of initial patients: ")
     initialPatients = int(input())
+    print("Do you want to visualize? (y/n) \n WARNING: This may cause program to run slowly")
+    doprint = False
+    response = input()
+    if response == 'y':
+        doprint = True
 
     # game state information initialization
     people = []
+    labeler = {}
     numDead = 0
     ticks = 0
     numInfected = initialPatients
@@ -62,15 +75,20 @@ def main():
 
     # constructing nodes
     for i in range(0, size):
-        isInfected = False
         if i < initialPatients:
             isInfected = True
+        else:
+            isInfected = False
         person = Person(deathRate, averageRecoveryTime, i, isInfected)
         people.append(person)
         if isInfected:
             infectedPeople.add(person)
+            labeler[person] = 'infected'
+        else:
+            labeler[person] = 'healthy'
     graph = nx.Graph()
     graph.add_nodes_from(people)
+    pos = nx.spring_layout(graph)
 
     # constructing edges for graph
     # TODO: make this more efficient somehow. It takes forever for large graphs
@@ -84,6 +102,9 @@ def main():
             p2 = people[n2]
         graph.add_edge(p1, p2)
 
+    if doprint:
+        draw(graph, pos, labeler)
+
     while numInfected > 0:
 
         infectedToday = set()
@@ -92,7 +113,9 @@ def main():
         # Determining who is infected, who recovers, and who dies this iteration
         for patient in infectedPeople:
             for neighbor in graph.adj[patient]:
-                if neighbor.alive and (not neighbor.immune) and (not neighbor.infected) and willInfect(r_0, totalConnections, size, averageRecoveryTime):
+                if neighbor.alive and \
+                   (not neighbor.immune) and (not neighbor.infected) and \
+                        willInfect(r_0, totalConnections, size, averageRecoveryTime):
                     neighbor.infected = True
                     infectedToday.add(neighbor)
 
@@ -101,6 +124,9 @@ def main():
                 if patient.willDie:
                     patient.alive = False
                     numDead += 1
+                    labeler[patient] = 'dead'
+                else:
+                    labeler[patient] = 'immune'
                 numInfected -= 1
                 uninfectedToday.add(patient)
                 patient.immune = True
@@ -113,16 +139,21 @@ def main():
             infectedPeople.add(infected)
             numInfected += 1
             totInfections += 1
+            labeler[infected] = 'infected'
 
         # Removing those no longer infected from the infected set
         for curedordead in uninfectedToday:
             infectedPeople.remove(curedordead)
+
+        if doprint:
+            draw(graph, pos, labeler)
 
     print("\n")
     print(str(numDead) + " people died")
     print(str(ticks) + " days since initial infection")
     print(str(totInfections) + " people were infected out of " +
           str(size) + " total people")
+
     return
 
 
